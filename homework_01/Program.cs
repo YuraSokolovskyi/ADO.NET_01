@@ -1,145 +1,347 @@
-﻿using System.Data;
+﻿using System.Configuration;
+using System.Data.Common;
 using System.Data.SqlClient;
+using CustomMenu;
+using System.Diagnostics;
 
 namespace homework_01
 {
     class Program
     {
-        private static void printHeader()
+        private static string ConnectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ToString();
+        private static string ProviderName = ConfigurationManager.ConnectionStrings["DefaultConnection"].ProviderName;
+
+        private static Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
+
+        private static List<int> findAllIndexesWithValue(string columnName, string value)
         {
-            Console.WriteLine("View table: T\n" +
-                              "View names: N\n" +
-                              "View colors: C\n" +
-                              "View max calories: M\n" +
-                              "View min calories: L\n" +
-                              "View average calories: A\n" +
-                              "View fruits: F\n" +
-                              "View vegetables: V\n" +
-                              "View fr/vg with color: 1\n" +
-                              "View fr/vg with less calories: 2\n" +
-                              "View fr/vg with more calories: 3\n" +
-                              "View fr/vg with calories in range: 4\n" +
-                              "View yellow and red fr/vg: 5\n"
-            );
+            return data[columnName]
+                .Select((item, index) => new { Item = item, Index = index })
+                .Where(item => item.Item == value)
+                .Select(item => item.Index)
+                .ToList();
         }
         
-        private static void printTable(SqlDataAdapter adapter, List<string> columns, DataSet dataSet)
+        private static List<int> findAllIndexesWithLessValue(string columnName, double value)
         {
-            dataSet.Clear();
-            adapter.Fill(dataSet);
-            
-            foreach (string dataColumn in columns)
-            {
-                Console.Write("{0,-10} ",  dataColumn);
-            }
-            Console.WriteLine("\n");
-                            
-            foreach (DataRow dataRow in dataSet.Tables[0].Rows)
-            {
-                foreach (string column in columns)
-                {
-                    Console.Write("{0,-10} ",  dataRow[column].ToString().Trim());
-                }
-                Console.WriteLine();
-            }
+            return data[columnName]
+                .Select((item, index) => new { Item = item, Index = index })
+                .Where(item => Double.Parse(item.Item) < value)
+                .Select(item => item.Index)
+                .ToList();
         }
         
-        static void Main(string[] args)
-        { 
-            string connectionString = "Data Source=localhost;Initial Catalog=Test;Integrated Security=true;Connection Timeout=30;";
-            SqlConnection connection = new SqlConnection(connectionString);
-            connection.Open();
-            Console.WriteLine("Connected");
-            DataSet dataSet = new DataSet();
-            SqlDataAdapter adapter = new SqlDataAdapter();
+        private static List<int> findAllIndexesWithMoreValue(string columnName, double value)
+        {
+            return data[columnName]
+                .Select((item, index) => new { Item = item, Index = index })
+                .Where(item => Double.Parse(item.Item) > value)
+                .Select(item => item.Index)
+                .ToList();
+        }
+        
+        private static List<int> findAllIndexesWithValueRange(string columnName, double valueFirst, double valueSecond)
+        {
+            return data[columnName]
+                .Select((item, index) => new { Item = item, Index = index })
+                .Where(item => Double.Parse(item.Item) >= valueFirst && Double.Parse(item.Item) <= valueSecond)
+                .Select(item => item.Index)
+                .ToList();
+        }
+        
+        private static async Task<(long, Dictionary<string, List<string>>)> ReadDataAsync(DbProviderFactory factory, List<string> columns)
+        {
+            Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
+            foreach (string column in columns) data[column] = new List<string>();
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             
-            ConsoleKey key = ConsoleKey.NoName;
-            List<string> columns = new List<string>();
-            string inputOne = "";
-            string inputTwo = "";
-            while (key != ConsoleKey.Q)
+            using (DbConnection connection = factory.CreateConnection())
             {
-                printHeader();
-                switch (key)
+                connection.ConnectionString = ConnectionString;
+                await connection.OpenAsync();
+
+                using (DbCommand command = factory.CreateCommand())
                 {
-                    case ConsoleKey.T:
-                        columns = new List<string>() { "id", "name", "type", "color", "calories" };
-                        printTable(new SqlDataAdapter("SELECT id, name, type, color, calories FROM FruitsAndVegetables", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.N:
-                        columns = new List<string>() { "name" };
-                        printTable(new SqlDataAdapter("SELECT name FROM FruitsAndVegetables", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.C:
-                        columns = new List<string>() { "color" };
-                        printTable(new SqlDataAdapter("SELECT color FROM FruitsAndVegetables", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.M:
-                        columns = new List<string>() { "max_calories" };
-                        printTable(new SqlDataAdapter("SELECT MAX(calories) AS max_calories FROM FruitsAndVegetables", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.L:
-                        columns = new List<string>() { "min_calories" };
-                        printTable(new SqlDataAdapter("SELECT MIN(calories) AS min_calories FROM FruitsAndVegetables", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.A:
-                        columns = new List<string>() { "average_calories" };
-                        printTable(new SqlDataAdapter("SELECT AVG(calories) AS average_calories FROM FruitsAndVegetables", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.F:
-                        columns = new List<string>() { "fruits" };
-                        printTable(new SqlDataAdapter("SELECT name AS fruits FROM FruitsAndVegetables WHERE (type=0)", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.V:
-                        columns = new List<string>() { "vegetables" };
-                        printTable(new SqlDataAdapter("SELECT name AS vegetables FROM FruitsAndVegetables WHERE (type=1)", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.D1:
-                        Console.Write("Enter color: ");
-                        inputOne = Console.ReadLine();
-                        Console.WriteLine();
-                        
-                        columns = new List<string>() { "fr/vg_with_color" };
-                        printTable(new SqlDataAdapter($"SELECT name AS 'fr/vg_with_color' FROM FruitsAndVegetables WHERE (color='{inputOne}')", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.D2:
-                        Console.Write("Enter calories: ");
-                        inputOne = Console.ReadLine();
-                        Console.WriteLine();
-                        
-                        columns = new List<string>() { "fr/vg_with_less_calories" };
-                        printTable(new SqlDataAdapter($"SELECT name AS 'fr/vg_with_less_calories' FROM FruitsAndVegetables WHERE (calories<'{inputOne}')", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.D3:
-                        Console.Write("Enter calories: ");
-                        inputOne = Console.ReadLine();
-                        Console.WriteLine();
-                        
-                        columns = new List<string>() { "fr/vg_with_more_calories" };
-                        printTable(new SqlDataAdapter($"SELECT name AS 'fr/vg_with_more_calories' FROM FruitsAndVegetables WHERE (calories>'{inputOne}')", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.D4:
-                        Console.Write("Enter min calories: ");
-                        inputOne = Console.ReadLine();
-                        Console.Write("Enter max calories: ");
-                        inputTwo = Console.ReadLine();
-                        Console.WriteLine();
-                        
-                        columns = new List<string>() { "fr/vg_with_calories_in_range" };
-                        printTable(new SqlDataAdapter($"SELECT name AS 'fr/vg_with_calories_in_range' FROM FruitsAndVegetables WHERE (calories BETWEEN {inputOne} AND {inputTwo})", connection), columns, dataSet);
-                        break;
-                    case ConsoleKey.D5:
-                        columns = new List<string>() { "red_yellow_fr/vg" };
-                        printTable(new SqlDataAdapter($"SELECT name AS 'red_yellow_fr/vg' FROM FruitsAndVegetables WHERE (color='Red' OR color='Yellow')", connection), columns, dataSet);
-                        break;
+                    command.Connection = connection;
+                    command.CommandText = "SELECT * FROM FruitsAndVegetables";
+                
+                    using (DbDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            foreach (string column in columns) data[column].Add(reader[column].ToString().Trim());
+                        }
+                    }
                 }
 
-                key = Console.ReadKey().Key;
-                Console.Clear();
+                await connection.CloseAsync();
             }
             
-            connection.Close();
-            Console.WriteLine("Disconnected");
+            stopwatch.Stop();
+
+            return (stopwatch.ElapsedMilliseconds, data);
+        }
+        
+        static async Task Main(string[] args)
+        {
+            Menu menu = new Menu();
+            // set up header
+            menu.addHeaderRow(
+            new List<string>(){
+                "View table: T",
+                "View names: N",
+                "View colors: C",
+                "View max calories: M",
+                "View min calories: L",
+                "View average calories: A",
+                "View fruits: F", 
+                "View vegetables: V",
+                "View fr/vg with color: 1",
+                "View fr/vg with less calories: 2",
+                "View fr/vg with more calories: 3",
+                "View fr/vg with calories in range: 4",
+                "View yellow and red fr/vg: 5",
+                "Update data: 7",
+                "Delete data: 8",
+                "Change DBMS: 9",
+            });
+            menu.setHeaderDivider("\n");
+            menu.setHeaderEndString("\n\n");
+
+            DbProviderFactories.RegisterFactory(ProviderName, SqlClientFactory.Instance);
+            DbProviderFactory factory = DbProviderFactories.GetFactory(ProviderName);
+            
+            List<string> fruitsAndVegetablesColumns = new List<string>() { "id", "name", "type", "color", "calories" };
+            string singleAnswer = "";
+            string inputOne = "";
+            string inputTwo = "";
+            long time = 0;
+
+            (time, data) = await ReadDataAsync(factory, fruitsAndVegetablesColumns);
+            Console.WriteLine($"Time spent reading: {time}ms\n");
+           
+           // add options for main loop
+           menu.addMainLoopOption(new Dictionary<ConsoleKey, Menu.MainLoopOptionDelegate>()
+           {
+               { ConsoleKey.T , () =>
+               {
+                   menu.printTableColumn(data, showRowNumber:true, name:"Table");
+               }},
+               { ConsoleKey.N, () =>
+               {
+                   List<string> columns = new List<string>() { "name" };
+                   menu.printTableColumn(columns, new List<List<string>>(){data["name"]}, name:"All names", showRowNumber:true);
+               }},
+               { ConsoleKey.C, () =>
+               {
+                   List<string> columns = new List<string>() { "color" };
+                   menu.printTableColumn(columns, new List<List<string>>(){data["color"].ToHashSet().ToList()}, name:"All colors", showRowNumber:true);
+               }},
+               { ConsoleKey.M, () =>
+               {
+                   string maxValue = data["calories"].Max(item => Int32.Parse(item)).ToString();
+                   menu.printTableColumn(data, name:"Max calories", showRowNumber:true, rowsToShow:findAllIndexesWithValue("calories", maxValue));
+               }},
+               { ConsoleKey.L, () =>
+               {
+                   string minValue = data["calories"].Min(item => Int32.Parse(item)).ToString();
+                   menu.printTableColumn(data, name:"Min calories", showRowNumber:true, rowsToShow:findAllIndexesWithValue("calories", minValue));
+               }},
+               { ConsoleKey.A, () =>
+               {
+                   menu.printSingleAnswer("average calories",
+                       (data["calories"].Sum(item => Int32.Parse(item)) / data["calories"].Count).ToString());
+               }},
+               { ConsoleKey.F, () =>
+               {
+                   menu.printTableColumn(data, "fruits", rowsToShow:findAllIndexesWithValue("type", "0"));
+               }},
+               { ConsoleKey.V, () =>
+               {
+                   menu.printTableColumn(data, "vegetables", rowsToShow:findAllIndexesWithValue("type", "1"));
+               }},
+               { ConsoleKey.D1, () =>
+               {
+                   Console.Write("Enter color: ");
+                   inputOne = Console.ReadLine();
+                   Console.WriteLine();
+                    
+                   menu.printTableColumn(data, $"{inputOne} fruits or vegetables", rowsToShow:findAllIndexesWithValue("color", inputOne));
+               }},
+               { ConsoleKey.D2, () =>
+               {
+                   Console.Write("Enter calories: ");
+                   inputOne = Console.ReadLine();
+                   Console.WriteLine();
+                    
+                   menu.printTableColumn(data, $"fruits or vegetables with less than {inputOne} calories", 
+                       rowsToShow:findAllIndexesWithLessValue("calories", Double.Parse(inputOne)));
+               }},
+               { ConsoleKey.D3, () =>
+               {
+                   Console.Write("Enter calories: ");
+                   inputOne = Console.ReadLine();
+                   Console.WriteLine();
+                    
+                   menu.printTableColumn(data, $"fruits or vegetables with more than {inputOne} calories", 
+                       rowsToShow:findAllIndexesWithMoreValue("calories", Double.Parse(inputOne)));
+               }},
+               { ConsoleKey.D4, () =>
+               {
+                   Console.Write("Enter min calories: ");
+                   inputOne = Console.ReadLine();
+                   Console.Write("Enter max calories: ");
+                   inputTwo = Console.ReadLine();
+                   Console.WriteLine();
+                    
+                   menu.printTableColumn(data, $"fruits or vegetables with more than {inputOne} and less than {inputTwo} calories", 
+                       rowsToShow:findAllIndexesWithValueRange("calories", Double.Parse(inputOne), Double.Parse(inputTwo)));
+               }},
+               { ConsoleKey.D5, () =>
+               {
+                   var res = data["color"]
+                       .Select((item, index) => new { Item = item, Index = index })
+                       .Where(item => item.Item == "Red" || item.Item == "Yellow")
+                       .Select(item => item.Index)
+                       .ToList();
+                   menu.printTableColumn(data, "red and yellow fruits/vegetables", rowsToShow:res);
+               }},
+               { ConsoleKey.D7, async () =>
+               {
+                   long timeUpdating = await updateMenu(data, factory);
+                   (time, data) = await ReadDataAsync(factory, fruitsAndVegetablesColumns);
+                   Console.Clear();
+                   Console.WriteLine($"Time spent updating: {timeUpdating}ms\n");
+                   Console.WriteLine($"Time spent reading: {time}ms\n");
+                   menu.printHeader();
+               }},
+               { ConsoleKey.D8, async () =>
+               {
+                   long timeDeleting = await deleteMenu(data, factory);
+                   (time, data) = await ReadDataAsync(factory, fruitsAndVegetablesColumns);
+                   Console.Clear();
+                   Console.WriteLine($"Time spent deleting: {timeDeleting}ms\n");
+                   Console.WriteLine($"Time spent reading: {time}ms\n");
+                   menu.printHeader();
+               }},
+               { ConsoleKey.D9, async () =>
+               {
+                   changeDBMS();
+                   Console.Clear();
+                   (time, data) = await ReadDataAsync(factory, fruitsAndVegetablesColumns);
+                   Console.WriteLine($"Time spent reading: {time}ms\n");
+                   menu.printHeader();
+               }},
+           });
+           menu.startMainLoop();
+        }
+
+        private static void changeDBMS()
+        {
+            ConnectionStringSettingsCollection strings = ConfigurationManager.ConnectionStrings;
+            List<string> keys = new List<string>();
+            foreach (ConnectionStringSettings  str in strings) keys.Add(str.Name);
+            Menu menu = new Menu();
+            menu.printTableColumn(new List<string>(){"Name"}, new List<List<string>>(){keys.GetRange(1,keys.Count - 1)}, autoGenerateId:true);
+            Console.Write("Enter row number: ");
+            int number = Int32.Parse(Console.ReadLine());
+            ConnectionString = ConfigurationManager.ConnectionStrings[keys[number + 1]].ToString();
+            ProviderName = ConfigurationManager.ConnectionStrings[keys[number + 1]].ProviderName;
+        }
+
+        private static async Task<long> updateMenu(Dictionary<string, List<string>> data, DbProviderFactory factory)
+        {
+            Console.Clear();
+            Menu updateMenu = new Menu();
+            updateMenu.setHeaderDivider("\n");
+            updateMenu.setHeaderEndString("\n\n");
+            int id = -1;
+            updateMenu.printTableColumn(data, "Select id");
+            Console.Write("Enter id: ");
+            id = Int32.Parse(Console.ReadLine());
+            Console.Clear();
+            
+            Console.WriteLine("Update name: 1\n" +
+                              "Update type(0-fruit, 1-vegetable): 2\n" +
+                              "Update color: 3\n" +
+                              "Update calories: 4\n");
+
+            ConsoleKey key = Console.ReadKey().Key;
+            
+            Console.Clear();
+            
+            Console.Write("Enter new value: ");
+
+            string newValue = Console.ReadLine();
+            long time = 0;
+            
+            if (key == ConsoleKey.D1) time = await updateAsync("name", $"'{newValue}'", id, factory);
+            else if (key == ConsoleKey.D2) time = await updateAsync("type", $"{newValue}", id, factory);
+            else if (key == ConsoleKey.D3) time = await updateAsync("color", $"'{newValue}'", id, factory);
+            else if (key == ConsoleKey.D4) time = await updateAsync("calories", $"{newValue}", id, factory);
+
+            return time;
+        }
+
+        private static async Task<long> updateAsync(string column, string newValue, int id, DbProviderFactory factory)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            
+            using (DbConnection connection = factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                await connection.OpenAsync();
+
+                DbCommand command = factory.CreateCommand();
+                command.CommandText = $"UPDATE FruitsAndVegetables SET {column}={newValue} WHERE id={id}";
+                command.Connection = connection;
+                await command.ExecuteNonQueryAsync();
+                
+                await connection.CloseAsync();
+            }
+            
+            stopwatch.Stop();
+            
+            return stopwatch.ElapsedMilliseconds;
+        }
+
+        private static async Task<long> deleteMenu(Dictionary<string, List<string>> data, DbProviderFactory factory)
+        {
+            Console.Clear();
+            Menu updateMenu = new Menu();
+            int id = -1;
+            updateMenu.printTableColumn(data, "Select id");
+            Console.Write("Enter id: ");
+            id = Int32.Parse(Console.ReadLine());
+
+            long time = await deleteAsync(id, factory);
+
+            return time;
+        }
+
+        private static async Task<long> deleteAsync(int id, DbProviderFactory factory)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            
+            using (DbConnection connection = factory.CreateConnection())
+            {
+                connection.ConnectionString = ConnectionString;
+                await connection.OpenAsync();
+
+                DbCommand command = factory.CreateCommand();
+                command.CommandText = $"DELETE FROM FruitsAndVegetables WHERE id={id}";
+                command.Connection = connection;
+                await command.ExecuteNonQueryAsync();
+                
+                await connection.CloseAsync();
+            }
+            
+            stopwatch.Stop();
+            return stopwatch.ElapsedMilliseconds;
         }
     }
 }

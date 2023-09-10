@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v6.0": {
       "homework_01/1.0.0": {
         "dependencies": {
+          "System.Configuration.ConfigurationManager": "8.0.0-preview.7.23375.6",
           "System.Data.SqlClient": "4.8.5"
         },
         "runtime": {
@@ -55,6 +56,17 @@
           }
         }
       },
+      "System.Configuration.ConfigurationManager/8.0.0-preview.7.23375.6": {
+        "dependencies": {
+          "System.Security.Cryptography.ProtectedData": "8.0.0-preview.7.23375.6"
+        },
+        "runtime": {
+          "lib/net6.0/System.Configuration.ConfigurationManager.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.37506"
+          }
+        }
+      },
       "System.Data.SqlClient/4.8.5": {
         "dependencies": {
           "Microsoft.Win32.Registry": "4.7.0",
@@ -86,6 +98,14 @@
         "dependencies": {
           "Microsoft.NETCore.Platforms": "3.1.0",
           "System.Security.Principal.Windows": "4.7.0"
+        }
+      },
+      "System.Security.Cryptography.ProtectedData/8.0.0-preview.7.23375.6": {
+        "runtime": {
+          "lib/net6.0/System.Security.Cryptography.ProtectedData.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.37506"
+          }
         }
       },
       "System.Security.Principal.Windows/4.7.0": {}
@@ -139,6 +159,13 @@
       "path": "runtime.win-x86.runtime.native.system.data.sqlclient.sni/4.4.0",
       "hashPath": "runtime.win-x86.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512"
     },
+    "System.Configuration.ConfigurationManager/8.0.0-preview.7.23375.6": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-qtpCObTyuym0I9RRpK7Lz6Jdtz8xTSNRVnMrd7zD8JDQv1U4bJK7SamCAMLBfQ2CfwGydOq2Bsytktldygh6wg==",
+      "path": "system.configuration.configurationmanager/8.0.0-preview.7.23375.6",
+      "hashPath": "system.configuration.configurationmanager.8.0.0-preview.7.23375.6.nupkg.sha512"
+    },
     "System.Data.SqlClient/4.8.5": {
       "type": "package",
       "serviceable": true,
@@ -152,6 +179,13 @@
       "sha512": "sha512-JECvTt5aFF3WT3gHpfofL2MNNP6v84sxtXxpqhLBCcDRzqsPBmHhQ6shv4DwwN2tRlzsUxtb3G9M3763rbXKDg==",
       "path": "system.security.accesscontrol/4.7.0",
       "hashPath": "system.security.accesscontrol.4.7.0.nupkg.sha512"
+    },
+    "System.Security.Cryptography.ProtectedData/8.0.0-preview.7.23375.6": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-xDYTmg2eDNXwpIF0cYma/VUMqEY4Og3ymss150zfAX12XPMk2zqnkoUNfgezmSaJMnTyqAVI5d7Ao/yJbDBvmg==",
+      "path": "system.security.cryptography.protecteddata/8.0.0-preview.7.23375.6",
+      "hashPath": "system.security.cryptography.protecteddata.8.0.0-preview.7.23375.6.nupkg.sha512"
     },
     "System.Security.Principal.Windows/4.7.0": {
       "type": "package",

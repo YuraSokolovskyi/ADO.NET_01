@@ -20,3 +20,6 @@ D:\C#\homework_01\homework_01\obj\Debug\net6.0\refint\homework_01.dll
 D:\C#\homework_01\homework_01\obj\Debug\net6.0\homework_01.pdb
 D:\C#\homework_01\homework_01\obj\Debug\net6.0\homework_01.genruntimeconfig.cache
 D:\C#\homework_01\homework_01\obj\Debug\net6.0\ref\homework_01.dll
+D:\C#\Homework_01\homework_01\bin\Debug\net6.0\homework_01.dll.config
+D:\C#\Homework_01\homework_01\bin\Debug\net6.0\System.Configuration.ConfigurationManager.dll
+D:\C#\Homework_01\homework_01\bin\Debug\net6.0\System.Security.Cryptography.ProtectedData.dll

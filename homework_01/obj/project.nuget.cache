@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "50Vnvffek+kfNZeIxGJT/YDB1W86d7kqCzuSJFgUFtYUCmDHKT0Qh/xKO75RkfkkyR/Rd2W8l5rlS2noZVPxAQ==",
+  "dgSpecHash": "VAteBc5FWykke1+vUmvTEKKv+pHbIxibm9yPooy96+NzLZjfJ+KYF3noZW+1Z3fVf/VyT0Y1T1CTA6Z7M+VzvA==",
   "success": true,
   "projectFilePath": "D:\\C#\\homework_01\\homework_01\\homework_01.csproj",
   "expectedPackageFiles": [
@@ -10,8 +10,10 @@
     "C:\\Users\\sokol\\.nuget\\packages\\runtime.win-arm64.runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.win-arm64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "C:\\Users\\sokol\\.nuget\\packages\\runtime.win-x64.runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.win-x64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "C:\\Users\\sokol\\.nuget\\packages\\runtime.win-x86.runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.win-x86.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
+    "C:\\Users\\sokol\\.nuget\\packages\\system.configuration.configurationmanager\\8.0.0-preview.7.23375.6\\system.configuration.configurationmanager.8.0.0-preview.7.23375.6.nupkg.sha512",
     "C:\\Users\\sokol\\.nuget\\packages\\system.data.sqlclient\\4.8.5\\system.data.sqlclient.4.8.5.nupkg.sha512",
     "C:\\Users\\sokol\\.nuget\\packages\\system.security.accesscontrol\\4.7.0\\system.security.accesscontrol.4.7.0.nupkg.sha512",
+    "C:\\Users\\sokol\\.nuget\\packages\\system.security.cryptography.protecteddata\\8.0.0-preview.7.23375.6\\system.security.cryptography.protecteddata.8.0.0-preview.7.23375.6.nupkg.sha512",
     "C:\\Users\\sokol\\.nuget\\packages\\system.security.principal.windows\\4.7.0\\system.security.principal.windows.4.7.0.nupkg.sha512"
   ],
   "logs": []
